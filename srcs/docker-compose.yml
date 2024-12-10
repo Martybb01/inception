@@ -6,3 +6,16 @@ services:
     ports:
       - "443:443"
     restart: always
+  
+  wordpress:
+    build: requirements/wordpress/.
+    container_name: wordpress
+    image: wordpress:custom
+    restart: always
+    # volumes:
+    #   - ./srcs/wordpress:/var/www/html
+    # environment:
+    #   WORDPRESS_DB_HOST: mysql
+    #   WORDPRESS_DB_USER: root
+    #   WORDPRESS_DB_PASSWORD: root
+    #   WORDPRESS_DB_NAME: wordpress
