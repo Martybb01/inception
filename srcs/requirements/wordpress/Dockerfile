@@ -1,21 +1,33 @@
-FROM debian:latest
+FROM debian:bullseye
 
-RUN apt-get update && apt-get install -y \
-    lsb-release \
-    ca-certificates \
-    apt-transport-https \
-    software-properties-common \
-    wget \
-    unzip && \
-    wget -q https://packages.sury.org/php/apt.gpg -O- | apt-key add - && \
-    echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list && \
-    apt-get update && apt-get install -y \
-    php8.1-fpm \
-    php8.1-mysql \
-    php8.1-curl
+EXPOSE 9000
 
-RUN wget https://wordpress.org/latest.zip && unzip latest.zip && rm latest.zip
+ARG	PHPPATH=/etc/php/7.4/fpm
 
-# COPY ./srcs/requirements/wordpress/wp-config.php /wordpress/wp-config.php
+RUN apt-get update && apt-get -y install php7.4-fpm php7.4-mysql wget tar ca-certificates
 
-CMD ["php-fpm8.1", "-F"]
+RUN	service php7.4-fpm stop
+
+COPY conf/www.conf ${PHPPATH}/pool.d/
+
+RUN sed -i 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g' ${PHPPATH}/php.ini && \
+	sed -i "s/listen = \/run\/php\/php$PHP_VERSION_ENV-fpm.sock/listen = 9000/g" ${PHPPATH}/pool.d/www.conf && \
+	sed -i 's/;listen.mode = 0660/listen.mode = 0660/g' ${PHPPATH}/pool.d/www.conf && \
+	sed -i 's/;daemonize = yes/daemonize = no/g' ${PHPPATH}/pool.d/www.conf
+
+RUN	wget --no-check-certificate https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+    chmod +x wp-cli.phar && \
+    mv wp-cli.phar /usr/local/bin/wp
+
+RUN	mkdir -p /run/php/ && \
+	mkdir -p /var/run/php/ && \
+	mkdir -p /var/www/inception/
+
+RUN	chown -R www-data:www-data /var/www/inception/
+
+COPY tools/setup.sh /bin/
+RUN	chmod +x /bin/setup.sh
+
+COPY conf/wp-config.php /tmp/
+
+CMD	["setup.sh", "php-fpm7.4", "--nodaemonize"]
