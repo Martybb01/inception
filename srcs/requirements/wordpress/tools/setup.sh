@@ -1,15 +1,5 @@
 #!/bin/bash
 
-WP_URL=marboccu.42.fr
-WP_TITLE=Inception
-WP_ADMIN_USER=theroot
-WP_ADMIN_PASSWORD=root
-WP_ADMIN_EMAIL=theroot@yolo.com
-WP_USER=marboccu
-WP_PASSWORD=pippo
-WP_EMAIL=marboccu@yolo.com
-WP_ROLE=editor
-
 chown -R www-data:www-data /var/www/inception/
 
 if [ ! -f /var/www/inception/wp-config.php ]; then

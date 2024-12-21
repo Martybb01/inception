@@ -1,10 +1,5 @@
 #!/bin/bash
 
-DB_PASS_ROOT=superpippo
-DB_USER=marboccu
-DB_PASSWORD=pippo
-DB_NAME=mariadb_db
-
 mysqld_safe --datadir="/var/lib/mysql" &
 sleep 5
 

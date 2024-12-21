@@ -1,21 +1,74 @@
 services:
-  nginx:
-    build: requirements/nginx/.
-    container_name: nginx
-    image: nginx:custom
-    ports:
-      - "443:443"
-    restart: always
+  mariadb:
+    container_name: mariadb
+    image: mariadb:custom
+    build: requirements/mariadb/.
+    init: true
+    volumes:
+      - database:/var/lib/mysql/
+    networks:
+      - inception-network
+    env_file:
+      - .env
+    restart: on-failure
   
   wordpress:
-    build: requirements/wordpress/.
     container_name: wordpress
     image: wordpress:custom
-    restart: always
-    # volumes:
-    #   - ./srcs/wordpress:/var/www/html
-    # environment:
-    #   WORDPRESS_DB_HOST: mysql
-    #   WORDPRESS_DB_USER: root
-    #   WORDPRESS_DB_PASSWORD: root
-    #   WORDPRESS_DB_NAME: wordpress
+    build: requirements/wordpress/.
+    init: true
+    volumes:
+      - wordpress_files:/var/www/inception/
+    networks:
+      - inception-network
+    env_file:
+      - .env
+    depends_on:
+      - mariadb
+    restart: on-failure
+
+  nginx:
+    container_name: nginx
+    image: nginx:custom
+    build:
+      context: requirements/nginx/.
+      args:
+        CERT_FOLDER: ${CERT_FOLDER}
+        CERTIFICATE: ${CERTIFICATE}
+        KEY: ${KEY}
+        COUNTRY: ${COUNTRY}
+        STATE: ${STATE}
+        LOCALITY: ${LOCALITY}
+        ORGANIZATION: ${ORGANIZATION}
+        UNIT: ${UNIT}
+        COMMON_NAME: ${COMMON_NAME}
+    init: true
+    ports:
+      - "443:443"
+    volumes:
+      - wordpress_files:/var/www/inception/
+    networks:
+      - inception-network
+    env_file:
+      - .env
+    depends_on:
+      - wordpress
+    restart: on-failure
+
+volumes:
+  database:
+    driver: local
+    driver_opts:
+      type: none
+      device: /Users/marboccu/data/database # /var/lib/mysql/ 
+      o: bind
+  wordpress_files:
+    driver: local
+    driver_opts:
+      type: none
+      device: /Users/marboccu/data/wordpress_files # /var/www/inception/
+      o: bind
+
+networks:
+  inception-network:
+    driver: bridge
