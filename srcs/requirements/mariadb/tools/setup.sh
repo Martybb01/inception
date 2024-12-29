@@ -3,41 +3,41 @@
 set -e
 echo "Starting MariaDB setup..."
 
-# Crea directory necessarie
+# Create necessary directories
 mkdir -p /var/lib/mysql/aria_log
+mkdir -p /run/mysqld
 chown -R mysql:mysql /var/lib/mysql
-chmod 777 /var/run/mysqld
+chmod -R 755 /var/lib/mysql
+chown -R mysql:mysql /run/mysqld
+chmod -R 755 /run/mysqld
 
-if [ ! -d "/var/lib/mysql/mysql" ]; then
-    echo "Initializing MariaDB database..."
-    
-    # Initialize database
-    mysql_install_db --user=mysql --datadir=/var/lib/mysql
-    echo "Database initialized."
+# Always initialize the database
+echo "Initializing MariaDB database..."
+mysql_install_db --user=mysql --datadir=/var/lib/mysql
 
-    # Start MariaDB in background
-    echo "Starting MariaDB in background..."
-    mysqld_safe --datadir=/var/lib/mysql --aria-log-dir-path=/var/lib/mysql/aria_log &
+# Start MariaDB in background
+echo "Starting MariaDB in background..."
+mysqld_safe --datadir=/var/lib/mysql --skip-networking &
 
-    # Wait for MariaDB to be ready
-    echo "Waiting for MariaDB to be ready..."
-    for i in {30..0}; do
-        if mysqladmin ping &>/dev/null; then
-            break
-        fi
-        echo "Waiting for database... $i"
-        sleep 1
-    done
-
-    if [ "$i" = 0 ]; then
-        echo >&2 'MariaDB init process failed.'
-        exit 1
+# Wait for MariaDB to be ready
+echo "Waiting for MariaDB to be ready..."
+for i in {30..0}; do
+    if mysqladmin ping &>/dev/null; then
+        break
     fi
+    echo "Waiting for database... $i"
+    sleep 1
+done
 
-    echo "MariaDB is up - Creating users and databases"
-    
-    # Configure database
-    mysql -u root << EOF
+if [ "$i" = 0 ]; then
+    echo >&2 'MariaDB init process failed.'
+    exit 1
+fi
+
+echo "MariaDB is up - Creating users and databases"
+
+# Configure database
+mysql --protocol=socket -uroot << EOF
 DELETE FROM mysql.user WHERE User='';
 DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
 DROP DATABASE IF EXISTS test;
@@ -53,11 +53,10 @@ SELECT User, Host FROM mysql.user;
 SHOW DATABASES;
 EOF
 
-    # Stop MariaDB safely
-    echo "Stopping temporary MariaDB instance..."
-    mysqladmin -u root -p${DB_PASS_ROOT} shutdown
-    echo "Temporary instance stopped."
-fi
+# Stop MariaDB safely
+echo "Stopping temporary MariaDB instance..."
+mysqladmin -u root -p${DB_PASS_ROOT} shutdown
+echo "Temporary instance stopped."
 
 echo "Starting MariaDB in foreground..."
 exec mysqld --user=mysql --console --skip-networking=0 --bind-address=0.0.0.0 --aria-log-dir-path=/var/lib/mysql/aria_log
