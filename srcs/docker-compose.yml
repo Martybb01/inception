@@ -1,3 +1,7 @@
+networks:
+  inception-network:
+    driver: bridge
+
 services:
   mariadb:
     container_name: mariadb
@@ -8,9 +12,17 @@ services:
       - database:/var/lib/mysql/
     networks:
       - inception-network
-    env_file:
-      - .env
+    environment:
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_PASS_ROOT=${DB_PASS_ROOT}
     restart: on-failure
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   
   wordpress:
     container_name: wordpress
@@ -21,11 +33,29 @@ services:
       - wordpress_files:/var/www/inception/
     networks:
       - inception-network
-    env_file:
-      - .env
+    environment:
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - WP_TITLE=${WP_TITLE}
+      - WP_ADMIN_USER=${WP_ADMIN_USER}
+      - WP_ADMIN_PASSWORD=${WP_ADMIN_PASSWORD}
+      - WP_ADMIN_EMAIL=${WP_ADMIN_EMAIL}
+      - WP_URL=${WP_URL}
+      - WP_USER=${WP_USER}
+      - WP_PASSWORD=${WP_PASSWORD}
+      - WP_EMAIL=${WP_EMAIL}
+      - WP_ROLE=${WP_ROLE}
+      - WP_FULL_URL=${WP_FULL_URL}
     depends_on:
       - mariadb
     restart: on-failure
+    healthcheck:
+      test: ["CMD", "php-fpm8.2", "-t"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   nginx:
     container_name: nginx
@@ -68,7 +98,3 @@ volumes:
       type: none
       device: /Users/marboccu/data/wordpress_files # /var/www/inception/
       o: bind
-
-networks:
-  inception-network:
-    driver: bridge
