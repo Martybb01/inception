@@ -11,13 +11,13 @@ chmod -R 755 /var/lib/mysql
 chown -R mysql:mysql /run/mysqld
 chmod -R 755 /run/mysqld
 
-# Always initialize the database
+# Initialize database
 echo "Initializing MariaDB database..."
 mysql_install_db --user=mysql --datadir=/var/lib/mysql
 
-# Start MariaDB in background
+# Start MariaDB in background with temporary root password
 echo "Starting MariaDB in background..."
-mysqld_safe --datadir=/var/lib/mysql --skip-networking &
+mysqld_safe --datadir=/var/lib/mysql --skip-grant-tables &
 
 # Wait for MariaDB to be ready
 echo "Waiting for MariaDB to be ready..."
@@ -37,20 +37,16 @@ fi
 echo "MariaDB is up - Creating users and databases"
 
 # Configure database
-mysql --protocol=socket -uroot << EOF
-DELETE FROM mysql.user WHERE User='';
-DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
-DROP DATABASE IF EXISTS test;
-DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
-
+mysql -uroot << EOF
+FLUSH PRIVILEGES;
+ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_PASS_ROOT}';
 CREATE DATABASE IF NOT EXISTS ${DB_NAME};
 CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
 GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'%';
-ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_PASS_ROOT}';
 FLUSH PRIVILEGES;
 
-SELECT User, Host FROM mysql.user;
-SHOW DATABASES;
+USE ${DB_NAME};
+SHOW TABLES;
 EOF
 
 # Stop MariaDB safely

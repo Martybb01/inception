@@ -19,6 +19,8 @@ define('WP_DEBUG', false);
 define('FORCE_SSL_ADMIN', true);
 define('AUTOMATIC_UPDATER_DISABLED', true);
 
+$table_prefix = 'wp_';
+
 if (!defined('ABSPATH')) {
     define('ABSPATH', __DIR__ . '/');
 }
