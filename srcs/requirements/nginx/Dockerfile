@@ -24,11 +24,6 @@ COPY conf/server.conf /etc/nginx/conf.d
 
 EXPOSE 443
 
-# RUN echo "\tserver name ${COMMON_NAME};\n\
-# 	\tssl_certificate ${CERTIFICATE};\n\
-# 	\tssl_certificate_key ${KEY};\n\
-# 	" >> /etc/nginx/conf.d/server.conf
-
 RUN	mkdir -p /var/www/
 RUN	chown -R www-data:www-data /var/www/
 
