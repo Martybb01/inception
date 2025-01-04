@@ -3,7 +3,6 @@ FROM debian:bullseye
 RUN	apt-get update && apt-get -y install mariadb-server \
 	&& rm -rf /var/lib/apt/lists/*
 
-# Crea le directory necessarie
 RUN mkdir -p /run/mysqld && \
     mkdir -p /var/lib/mysql/aria_log && \
     chown -R mysql:mysql /var/lib/mysql && \

@@ -7,7 +7,7 @@ echo "Starting WordPress setup..."
 wait_for_db() {
     echo "Testing database connection..."
     for i in {1..30}; do
-        if mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" -e "SELECT 1;" > /dev/null 2>&1; then
+        if mysql -h "$DB_HOST" -u "$DB_USER" -p "$DB_PASSWORD" "$DB_NAME" -e "SELECT 1;" > /dev/null 2>&1; then
             echo "Database connection successful!"
             return 0
         fi
@@ -19,20 +19,18 @@ wait_for_db() {
 }
 
 echo "Setting up WordPress directory..."
-# Crea tutte le directory necessarie
+
 mkdir -p /var/www/inception/
 mkdir -p /var/www/inception/wp-content/
 mkdir -p /var/www/inception/wp-content/themes/
 mkdir -p /var/www/inception/wp-content/plugins/
 mkdir -p /var/www/inception/wp-content/uploads/
 
-# Imposta i permessi corretti
 chown -R www-data:www-data /var/www/inception/
 chmod -R 755 /var/www/inception/
 
 cd /var/www/inception/
 
-# Scarica WordPress se non esiste
 if [ ! -f /var/www/inception/wp-config.php ]; then
     echo "Downloading WordPress core..."
     wp core download --allow-root --force
@@ -61,7 +59,6 @@ if ! wp core is-installed --allow-root; then
         --role="$WP_ROLE"
 fi
 
-# Imposta nuovamente i permessi dopo l'installazione
 chown -R www-data:www-data /var/www/inception/
 chmod -R 755 /var/www/inception/
 find /var/www/inception/ -type f -exec chmod 644 {} \;
