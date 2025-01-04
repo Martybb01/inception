@@ -90,11 +90,11 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: ${DATA_PATH}/database # su docker /var/lib/mysql/
+      device: /Users/marboccu/data/database # su docker /var/lib/mysql/
       o: bind
   wordpress_files:
     driver: local
     driver_opts:
       type: none
-      device: ${DATA_PATH}/wordpress_files # su docker /var/www/inception/
+      device: /Users/marboccu/data/wordpress_files # su docker /var/www/inception/
       o: bind

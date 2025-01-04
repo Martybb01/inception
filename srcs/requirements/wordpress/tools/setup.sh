@@ -7,7 +7,7 @@ echo "Starting WordPress setup..."
 wait_for_db() {
     echo "Testing database connection..."
     for i in {1..30}; do
-        if mysql -h "$DB_HOST" -u "$DB_USER" -p "$DB_PASSWORD" "$DB_NAME" -e "SELECT 1;" > /dev/null 2>&1; then
+        if mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" -e "SELECT 1;" > /dev/null 2>&1; then
             echo "Database connection successful!"
             return 0
         fi
