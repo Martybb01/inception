@@ -38,6 +38,10 @@ if [ ! -f /var/www/inception/wp-config.php ]; then
     echo "Copying wp-config.php..."
     cp /tmp/wp-config.php /var/www/inception/
     chown www-data:www-data /var/www/inception/wp-config.php
+    
+    echo "Generating WordPress authentication keys..."
+    curl -s https://api.wordpress.org/secret-key/1.1/salt/ > /var/www/inception/wp-keys.php
+    chown www-data:www-data /var/www/inception/wp-keys.php
 fi
 
 echo "Waiting for database..."
