@@ -18,11 +18,6 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_PASS_ROOT=${DB_PASS_ROOT}
     restart: on-failure
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
   
   wordpress:
     container_name: wordpress
@@ -51,11 +46,6 @@ services:
     depends_on:
       - mariadb
     restart: on-failure
-    healthcheck:
-      test: ["CMD", "php-fpm8.2", "-t"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
 
   nginx:
     container_name: nginx

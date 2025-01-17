@@ -21,13 +21,9 @@ RUN apt-get update && \
     php${PHP_VERSION}-mbstring \
     php${PHP_VERSION}-xml \
     php${PHP_VERSION}-zip \
-	mariadb-client \
-	iputils-ping \
-    net-tools \
-    tar \
-	curl \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+    mariadb-client \
+    curl \
+    ca-certificates
 
 RUN rm -f /usr/local/bin/wp
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \

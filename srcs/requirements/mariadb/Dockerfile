@@ -1,7 +1,6 @@
 FROM debian:bullseye
 
-RUN	apt-get update && apt-get -y install mariadb-server \
-	&& rm -rf /var/lib/apt/lists/*
+RUN	apt-get update && apt-get -y install mariadb-server
 
 RUN mkdir -p /run/mysqld && \
     mkdir -p /var/lib/mysql/aria_log && \
