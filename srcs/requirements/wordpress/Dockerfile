@@ -51,8 +51,6 @@ RUN chown -R www-data:www-data /var/www/inception/
 COPY tools/setup.sh /bin/
 RUN chmod +x /bin/setup.sh
 
-COPY conf/wp-config.php /tmp/
-
 WORKDIR /var/www/inception
 
 CMD ["/bin/setup.sh"]

@@ -4,6 +4,15 @@ set -x
 
 echo "Starting WordPress setup..."
 
+set_permissions() {
+    echo "Setting correct permissions..."
+    find /var/www/inception -type d -exec chmod 755 {} \;
+    find /var/www/inception -type f -exec chmod 644 {} \;
+    chown -R www-data:www-data /var/www/inception
+    chmod -R 755 /var/www/inception
+    echo "Permissions set successfully."
+}
+
 wait_for_db() {
     echo "Testing database connection..."
     for i in {1..30}; do
@@ -20,28 +29,28 @@ wait_for_db() {
 
 echo "Setting up WordPress directory..."
 
-mkdir -p /var/www/inception/
-mkdir -p /var/www/inception/wp-content/
-mkdir -p /var/www/inception/wp-content/themes/
-mkdir -p /var/www/inception/wp-content/plugins/
-mkdir -p /var/www/inception/wp-content/uploads/
-
-chown -R www-data:www-data /var/www/inception/
-chmod -R 755 /var/www/inception/
+set_permissions
 
 cd /var/www/inception/
 
 if [ ! -f /var/www/inception/wp-config.php ]; then
     echo "Downloading WordPress core..."
     wp core download --allow-root --force
-    
-    echo "Copying wp-config.php..."
-    cp /tmp/wp-config.php /var/www/inception/
-    chown www-data:www-data /var/www/inception/wp-config.php
-    
-    echo "Generating WordPress authentication keys..."
-    curl -s https://api.wordpress.org/secret-key/1.1/salt/ > /var/www/inception/wp-keys.php
-    chown www-data:www-data /var/www/inception/wp-keys.php
+
+    echo "Creating wp-config.php using wp-cli..."
+    wp config create --allow-root \
+        --dbname="$DB_NAME" \
+        --dbuser="$DB_USER" \
+        --dbpass="$DB_PASSWORD" \
+        --dbhost="$DB_HOST" \
+        --dbprefix="wp_" \
+        --extra-php <<PHP
+define('WP_HOME', getenv('WP_FULL_URL'));
+define('WP_SITEURL', getenv('WP_FULL_URL'));
+define('FORCE_SSL_ADMIN', true);
+define('AUTOMATIC_UPDATER_DISABLED', true);
+PHP
+    set_permissions
 fi
 
 echo "Waiting for database..."
@@ -61,12 +70,11 @@ if ! wp core is-installed --allow-root; then
         "$WP_USER" "$WP_EMAIL" \
         --user_pass="$WP_PASSWORD" \
         --role="$WP_ROLE"
+    
+    set_permissions
 fi
 
-chown -R www-data:www-data /var/www/inception/
-chmod -R 755 /var/www/inception/
-find /var/www/inception/ -type f -exec chmod 644 {} \;
-find /var/www/inception/ -type d -exec chmod 755 {} \;
+set_permissions
 
 echo "Setup complete! Starting PHP-FPM..."
 exec /usr/sbin/php-fpm8.2 --nodaemonize
