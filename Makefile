@@ -1,6 +1,6 @@
 NAME		= inception
 DOCKER		= docker compose -f srcs/docker-compose.yml
-DATA_PATH	= /Users/marboccu/data
+DATA_PATH	= /home/marboccu/data
 
 GREEN		= \033[0;32m
 RED			= \033[0;31m

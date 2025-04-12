@@ -12,6 +12,4 @@ COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/
 COPY tools/setup.sh /bin/
 RUN	chmod +x /bin/setup.sh
 
-EXPOSE 3306
-
 CMD	["/bin/setup.sh"]

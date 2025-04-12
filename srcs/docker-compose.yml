@@ -80,11 +80,11 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /Users/marboccu/data/database # su docker /var/lib/mysql/
+      device: /home/marboccu/data/database # su docker /var/lib/mysql/
       o: bind
   wordpress_files:
     driver: local
     driver_opts:
       type: none
-      device: /Users/marboccu/data/wordpress_files # su docker /var/www/inception/
+      device: /home/marboccu/data/wordpress_files # su docker /var/www/inception/
       o: bind

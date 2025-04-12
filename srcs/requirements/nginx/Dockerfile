@@ -20,9 +20,6 @@ RUN mkdir -p ${CERT_FOLDER} && \
 	-subj "/C=${COUNTRY}/ST=${STATE}/L=${LOCALITY}/O=${ORGANIZATION}/OU=${UNIT}/CN=${COMMON_NAME}"
 
 COPY conf/nginx.conf /etc/nginx/
-COPY conf/server.conf /etc/nginx/conf.d
-
-EXPOSE 443
 
 RUN	mkdir -p /var/www/
 RUN	chown -R www-data:www-data /var/www/
